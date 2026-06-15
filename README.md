@@ -175,18 +175,35 @@ SUM(total_pnl) OVER (PARTITION BY vol_regime, symbol ORDER BY total_pnl DESC
 
 ## Results
 
-### Net PnL by Symbol × Volatility Regime
-![](output/charts/01_pnl_by_symbol_vol_regime.png)
 
-### Cumulative Net PnL by Account Tier
-![](output/charts/02_cumulative_pnl_by_tier.png)
+---
 
-### Top 10 Accounts — BTC-USD in HIGH vol regime
-![](output/charts/04_top_accounts_btc_high_vol.png)
+## Verified on Databricks (Free Edition · Serverless · Unity Catalog)
 
-**Reading the result:** market-maker accounts dominate the top of every
-leaderboard because they earn the spread regardless of direction — a sanity
-check that the regime labels and PnL plumbing are wired up correctly.
+The complete pipeline runs end-to-end on **Databricks Free Edition** using
+**serverless compute**, with outputs persisted as **Unity Catalog managed
+tables** (`workspace.default.crypto_bronze`, `crypto_silver`, `crypto_gold_agg`)
+partitioned by `trade_date`, `symbol`, and `vol_regime`.
+
+### Serverless compute running the workload
+![](docs/databricks_screenshot/04_databricks_serverless_compute.png)
+
+### Spark SQL aggregation — PnL by tier × volatility regime
+9 rows in **3.88 seconds** — multi-dim GroupBy across 32 accounts × 3 tiers × 3 regimes.
+![](docs/databricks_screenshot/01_sql_pnl_by_tier_regime.png)
+
+### `DENSE_RANK` window function — top-3 accounts per (vol_regime, symbol)
+72-row leaderboard in **1.73 seconds**. Market-maker accounts dominate rank 1
+in 7 of 8 symbols — the spread-earner economic signal coming through cleanly.
+![](docs/databricks_screenshot/02_sql_dense_rank.png)
+
+### End-to-end pipeline — Gold-layer chart + Unity Catalog managed tables
+![](docs/databricks_screenshot/03_pipeline_complete_with_chart.png)
+
+> Same PySpark + Spark SQL logic as the local version in `src/pipeline.py`.
+> Only the write API swaps from `.parquet(path)` to `.saveAsTable(name)` to
+> work within Free Edition's filesystem restrictions — storage backend is
+> still Parquet underneath, managed by Unity Catalog.
 
 ---
 
