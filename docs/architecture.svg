@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 620" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#334155"/>
+    </marker>
+    <linearGradient id="bronze" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#cd7f32"/><stop offset="1" stop-color="#a05a18"/>
+    </linearGradient>
+    <linearGradient id="silver" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c0c0c0"/><stop offset="1" stop-color="#8a8a8a"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffd700"/><stop offset="1" stop-color="#b8860b"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1100" height="620" fill="#f8fafc"/>
+  <text x="550" y="35" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">
+    Crypto Trades — PySpark Big-Data Pipeline (Medallion Architecture)
+  </text>
+  <text x="550" y="58" text-anchor="middle" font-size="13" fill="#475569">
+    211,000 trades · 32 accounts · 8 symbols · 3 venues · 60 days · Hive-style partitioned Parquet
+  </text>
+
+  <!-- SOURCE -->
+  <g>
+    <rect x="40" y="100" width="180" height="100" rx="10" fill="#e2e8f0" stroke="#475569" stroke-width="1.5"/>
+    <text x="130" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">SOURCE</text>
+    <text x="130" y="155" text-anchor="middle" font-size="12" fill="#334155">crypto_trades.csv</text>
+    <text x="130" y="172" text-anchor="middle" font-size="11" fill="#64748b">211K rows · 28 MB</text>
+    <text x="130" y="188" text-anchor="middle" font-size="11" fill="#64748b">single-node origin</text>
+  </g>
+
+  <!-- BRONZE -->
+  <g>
+    <rect x="280" y="100" width="200" height="100" rx="10" fill="url(#bronze)" stroke="#7c4a14" stroke-width="1.5"/>
+    <text x="380" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">BRONZE</text>
+    <text x="380" y="152" text-anchor="middle" font-size="12" fill="#fff">Typed Parquet</text>
+    <text x="380" y="170" text-anchor="middle" font-size="11" fill="#fce7c0">partitionBy(trade_date)</text>
+    <text x="380" y="186" text-anchor="middle" font-size="11" fill="#fce7c0">60 daily partitions</text>
+  </g>
+
+  <!-- SILVER -->
+  <g>
+    <rect x="540" y="100" width="220" height="100" rx="10" fill="url(#silver)" stroke="#525252" stroke-width="1.5"/>
+    <text x="650" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">SILVER</text>
+    <text x="650" y="152" text-anchor="middle" font-size="12" fill="#0f172a">Window functions</text>
+    <text x="650" y="170" text-anchor="middle" font-size="11" fill="#1f2937">vol_regime / trend_regime</text>
+    <text x="650" y="186" text-anchor="middle" font-size="11" fill="#1f2937">partitionBy(trade_date, symbol)</text>
+  </g>
+
+  <!-- GOLD -->
+  <g>
+    <rect x="820" y="100" width="240" height="100" rx="10" fill="url(#gold)" stroke="#8b6914" stroke-width="1.5"/>
+    <text x="940" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">GOLD</text>
+    <text x="940" y="152" text-anchor="middle" font-size="12" fill="#0f172a">Regime aggregates</text>
+    <text x="940" y="170" text-anchor="middle" font-size="11" fill="#1f2937">DENSE_RANK · cum-sum</text>
+    <text x="940" y="186" text-anchor="middle" font-size="11" fill="#1f2937">partitionBy(vol_regime, symbol)</text>
+  </g>
+
+  <!-- Flow arrows -->
+  <line x1="220" y1="150" x2="280" y2="150" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="480" y1="150" x2="540" y2="150" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="760" y1="150" x2="820" y2="150" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Transformations row -->
+  <g font-size="11" fill="#475569">
+    <text x="250" y="220" text-anchor="middle" font-style="italic">spark.read.csv(schema=...)</text>
+    <text x="510" y="220" text-anchor="middle" font-style="italic">groupBy · lag · avg · stddev_pop OVER</text>
+    <text x="790" y="220" text-anchor="middle" font-style="italic">SUM · DENSE_RANK · ROW_NUMBER OVER</text>
+  </g>
+
+  <!-- Consumers -->
+  <g>
+    <rect x="60" y="320" width="220" height="120" rx="10" fill="#dbeafe" stroke="#1e40af" stroke-width="1.5"/>
+    <text x="170" y="348" text-anchor="middle" font-size="14" font-weight="700" fill="#1e3a8a">Spark SQL Queries</text>
+    <text x="170" y="372" text-anchor="middle" font-size="11" fill="#1e293b">Q1: tier × vol_regime PnL</text>
+    <text x="170" y="388" text-anchor="middle" font-size="11" fill="#1e293b">Q2: top-N accounts (RANK)</text>
+    <text x="170" y="404" text-anchor="middle" font-size="11" fill="#1e293b">Q3: LAG day-over-day</text>
+    <text x="170" y="420" text-anchor="middle" font-size="11" fill="#1e293b">Q4: 7-day MA (ROWS BETWEEN)</text>
+  </g>
+
+  <g>
+    <rect x="320" y="320" width="240" height="120" rx="10" fill="#dcfce7" stroke="#166534" stroke-width="1.5"/>
+    <text x="440" y="348" text-anchor="middle" font-size="14" font-weight="700" fill="#14532d">Matplotlib Reports</text>
+    <text x="440" y="372" text-anchor="middle" font-size="11" fill="#1e293b">PnL × Symbol × VolRegime</text>
+    <text x="440" y="388" text-anchor="middle" font-size="11" fill="#1e293b">Cumulative PnL by tier</text>
+    <text x="440" y="404" text-anchor="middle" font-size="11" fill="#1e293b">Trade-share pie</text>
+    <text x="440" y="420" text-anchor="middle" font-size="11" fill="#1e293b">Top-10 accounts BTC HIGH</text>
+  </g>
+
+  <g>
+    <rect x="600" y="320" width="220" height="120" rx="10" fill="#fef9c3" stroke="#854d0e" stroke-width="1.5"/>
+    <text x="710" y="348" text-anchor="middle" font-size="14" font-weight="700" fill="#713f12">Databricks CE Notebook</text>
+    <text x="710" y="372" text-anchor="middle" font-size="11" fill="#1e293b">DBFS-backed paths</text>
+    <text x="710" y="388" text-anchor="middle" font-size="11" fill="#1e293b">display() + %sql cells</text>
+    <text x="710" y="404" text-anchor="middle" font-size="11" fill="#1e293b">Single-cluster, free tier</text>
+    <text x="710" y="420" text-anchor="middle" font-size="11" fill="#1e293b">Import .py or .ipynb</text>
+  </g>
+
+  <g>
+    <rect x="860" y="320" width="200" height="120" rx="10" fill="#fee2e2" stroke="#991b1b" stroke-width="1.5"/>
+    <text x="960" y="348" text-anchor="middle" font-size="14" font-weight="700" fill="#7f1d1d">Downstream Consumers</text>
+    <text x="960" y="372" text-anchor="middle" font-size="11" fill="#1e293b">BI tools (Tableau/PBI)</text>
+    <text x="960" y="388" text-anchor="middle" font-size="11" fill="#1e293b">ML feature store</text>
+    <text x="960" y="404" text-anchor="middle" font-size="11" fill="#1e293b">Risk dashboards</text>
+    <text x="960" y="420" text-anchor="middle" font-size="11" fill="#1e293b">Compliance reports</text>
+  </g>
+
+  <!-- Tech bar -->
+  <rect x="40" y="490" width="1020" height="90" rx="10" fill="#0f172a"/>
+  <text x="550" y="518" text-anchor="middle" font-size="13" font-weight="700" fill="#f1f5f9">Tech Stack</text>
+  <g font-size="12" fill="#e2e8f0">
+    <text x="120" y="548">PySpark 3.5</text>
+    <text x="240" y="548">Spark SQL</text>
+    <text x="340" y="548">Parquet (snappy)</text>
+    <text x="490" y="548">Hive-style partitions</text>
+    <text x="660" y="548">AQE enabled</text>
+    <text x="780" y="548">Databricks CE</text>
+    <text x="900" y="548">Matplotlib</text>
+  </g>
+  <text x="550" y="568" text-anchor="middle" font-size="11" fill="#94a3b8">
+    Local mode (master=local[*]) for dev · DBFS + cluster for prod · same code, parametric paths
+  </text>
+</svg>
