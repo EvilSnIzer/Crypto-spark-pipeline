@@ -185,19 +185,19 @@ tables** (`workspace.default.crypto_bronze`, `crypto_silver`, `crypto_gold_agg`)
 partitioned by `trade_date`, `symbol`, and `vol_regime`.
 
 ### Serverless compute running the workload
-![](docs/databricks_screenshots/04_databricks_serverless_compute.png)
+![](docs/databricks_screenshot/04_databricks_serverless_compute.png.png)
 
 ### Spark SQL aggregation — PnL by tier × volatility regime
 9 rows in **3.88 seconds** — multi-dim GroupBy across 32 accounts × 3 tiers × 3 regimes.
-![](docs/databricks_screenshots/01_sql_pnl_by_tier_regime.png)
+![](docs/databricks_screenshot/01_sql_pnl_by_tier_regime.png.png)
 
 ### `DENSE_RANK` window function — top-3 accounts per (vol_regime, symbol)
 72-row leaderboard in **1.73 seconds**. Market-maker accounts dominate rank 1
 in 7 of 8 symbols — the spread-earner economic signal coming through cleanly.
-![](docs/databricks_screenshots/02_sql_dense_rank.png)
+![](docs/databricks_screenshot/02_sql_dense_rank.png.png)
 
 ### End-to-end pipeline — Gold-layer chart + Unity Catalog managed tables
-![](docs/databricks_screenshots/03_pipeline_complete_with_chart.png)
+![](docs/databricks_screenshot/03_pipeline_complete_with_chart.png.png)
 
 > Same PySpark + Spark SQL logic as the local version in `src/pipeline.py`.
 > Only the write API swaps from `.parquet(path)` to `.saveAsTable(name)` to
